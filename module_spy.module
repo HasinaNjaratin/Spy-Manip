@@ -1,0 +1,27 @@
+<?php
+include(drupal_get_path('module','module_spy').'/includes/module_spy.functions.inc');
+
+/**
+ * Implements hook_form_alter().
+ */
+function module_spy_form_alter(&$form, &$form_state, $form_id){
+    if(!array_key_exists('#user',$form) && !array_key_exists('#node',$form) && !array_key_exists('#term',$form) ){
+        //array_unshift($form['#submit'], "_module_spy_trace_all");
+    }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function module_spy_node_presave($node) {
+  $fields_changed = _fields_changed($node->original, $node);
+  myprint($fields_changed);
+}
+
+/**
+ * Implements hook_taxonomy_term_presave().
+ */
+function module_spy_taxonomy_term_presave($term) {
+  $fields_changed = _fields_changed($term->original, $term);
+  myprint($fields_changed);
+}

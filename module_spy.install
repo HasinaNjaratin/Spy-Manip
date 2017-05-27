@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function module_spy_install() {
+    _module_spy_create_table();  
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function module_spy_uninstall() {
+    _module_spy_drop_table();  
+}
+
+function _module_spy_create_table(){
+    db_query('CREATE TABLE spy
+        (
+            spy_Id int NOT NULL,
+            uid int,
+            ip varchar(255),
+            time varchar(255),
+            url text,
+            form_id varchar(255),
+            changed longtext,
+            CONSTRAINT pk_PersonID PRIMARY KEY (spy_Id)
+        )'
+    );
+}
+
+function _module_spy_drop_table(){
+	db_query('DROP TABLE IF EXISTS spy');
+}
