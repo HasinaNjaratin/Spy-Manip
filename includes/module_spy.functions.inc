@@ -5,7 +5,6 @@
 **/
 function module_spy_log_manip($change){
   global $user;
-  myprint($change);
   db_insert('spy')->fields(array(
       'spy_Id' => REQUEST_TIME,
       'uid' => $user->uid,
