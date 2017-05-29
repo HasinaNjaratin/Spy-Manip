@@ -1,28 +1,22 @@
 <?php
 
-function _module_spy_trace_all($form, &$form_state){
-	$changed = array();
-	$formValues = $form_state['values'];
-	$formInputs = $form_state['input'];
-    //$formInputs = $formValues['original_item'];
-    $changed = array();
-    $notListenFields = array('form_build_id','form_token','form_id');
-    foreach ($formValues as $key => $value) {
-        if(array_key_exists($key,$formInputs) && !in_array($key, $notListenFields) ){
-            if(($formInputs[$key] != $value) || (is_null($formInputs[$key]) && !is_null($value))){
-                $changed[] = $key;
-            }
-        }
-    }
-    print '<pre>';
-    print_r($formValues);
-    print "******-----values------*********";
-    print_r($formInputs);
-    print "******-----inputs-----******";
-    print_r($form);
-    die("de");
-
+/**
+* Log manip
+**/
+function module_spy_log_manip($change){
+  global $user;
+  myprint($change);
+  db_insert('spy')->fields(array(
+      'spy_Id' => REQUEST_TIME,
+      'uid' => $user->uid,
+      'ip' => ip_address(),
+      'time' => REQUEST_TIME,
+      'url' => current_path(),
+      'form_id' => $change['form'],
+      'changed' => $change['change'],
+  ))->execute();
 }
+
 
 /*
  * Pass both versions of the node to this function. Returns an array of
@@ -36,19 +30,18 @@ function _module_spy_trace_all($form, &$form_state){
  *   The prepared node object for comparison.
  *   This function may also pass itself a FieldCollectionItemEntity object to compare field collections.
  */
-function _fields_changed($old_entity, $new_entity, $bundle=NULL) {
+function module_spy_fields_changed_node($old_entity, $new_entity, $bundle=NULL) {
   // Check for node or field collection.
   $entity_is_field_collection = (get_class($old_entity) == 'FieldCollectionItemEntity');
 
-  /*$bundle = ($entity_is_field_collection ? $old_entity->field_name : $old_entity->type);
+  $bundle = ($entity_is_field_collection ? $old_entity->field_name : $old_entity->type);
 
   // Sanity check. Exit and throw an error if the content types don't match.
   if ($bundle !== ($entity_is_field_collection ? $new_entity->field_name : $new_entity->type)) {
     drupal_set_message('Content type mismatch. Unable to save changes.', 'error');
     return FALSE;
   }
-*/
-$bundle = 'taxonomy_term';
+
   // Get field info.
   $field_read_params = array(
     /*'entity_type' =>*/ /*($entity_is_field_collection ? 'field_collection_item' :*/ /*'taxonomy_term'*/
@@ -128,5 +121,38 @@ $bundle = 'taxonomy_term';
   unset($field_name, $field_info);
   // End of field comparison loop.
 
+  return $fields_changed;
+}
+
+/*
+* Fields changed from taxonomy term
+*/
+function module_spy_fields_changed_term($old_term, $new_term){
+  $fields_changed = [];
+  if($old_term->name !== $new_term->name){ $fields_changed[] = 'name'; }
+  if($old_term->description !== $new_term->description){ $fields_changed[] = 'description'; }
+  foreach ($old_term as $key => $value) {
+    if ((strpos($key, 'field_') !== false) && (isset($old_term->{$key}) && !empty($old_term->{$key}) && (isset($new_term->{$key})) && !empty($new_term->{$key}) )) {
+      if(!empty($old_term->{$key}) && (sizeof($old_term->{$key}) == sizeof($new_term->{$key})) ){
+        foreach ($old_term->{$key}[LANGUAGE_NONE] as $id => $valeur) {
+          reset($valeur);
+          $get_value =  key($valeur);
+          if($old_term->{$key}[LANGUAGE_NONE][$id][$get_value] != $new_term->{$key}[LANGUAGE_NONE][$id][$get_value]){
+            $fields_changed[] = $key;
+          }
+        }
+      }else{
+        $fields_changed[] = $key;
+      }
+    }
+  }
+  return $fields_changed;
+}
+
+/*
+* Fields changed from user
+*/
+function module_spy_fields_changed_user($edit,$account){
+  $fields_changed = [];
   return $fields_changed;
 }

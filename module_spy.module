@@ -6,22 +6,58 @@ include(drupal_get_path('module','module_spy').'/includes/module_spy.functions.i
  */
 function module_spy_form_alter(&$form, &$form_state, $form_id){
     if(!array_key_exists('#user',$form) && !array_key_exists('#node',$form) && !array_key_exists('#term',$form) ){
-        //array_unshift($form['#submit'], "_module_spy_trace_all");
+        $form['#submit'][] = 'module_spy_form_submit';
     }
 }
+
+/**
+* Submit log manip
+**/
+function module_spy_form_submit($form, &$form_state){
+  $change = array(
+    'form' => $form['#id'],
+    'change' => ''
+  );
+  module_spy_log_manip($change);
+}
+
 
 /**
  * Implements hook_node_presave().
  */
 function module_spy_node_presave($node) {
-  $fields_changed = _fields_changed($node->original, $node);
-  myprint($fields_changed);
+  $fields_changed = module_spy_fields_changed_node($node->original, $node, $node->type);
+  if(!empty($fields_changed)){
+    $change = array(
+      'form' => $node->type."-node-form",
+      'change' => implode(",", $fields_changed)
+    );
+    module_spy_log_manip($change);
+  }
 }
 
 /**
  * Implements hook_taxonomy_term_presave().
  */
 function module_spy_taxonomy_term_presave($term) {
-  $fields_changed = _fields_changed($term->original, $term);
-  myprint($fields_changed);
+  $fields_changed = module_spy_fields_changed_term($term->original, $term);
+  if(!empty($fields_changed)){
+    $change = array(
+      'form' => "taxonomy-form-term (".$term->vocabulary_machine_name.")",
+      'change' => implode(",", $fields_changed)
+    ); 
+    module_spy_log_manip($change);
+  }
+}
+
+/**
+ * Implements hook_user_presave().
+ */
+function module_spy_user_presave(&$edit, $account, $category) {
+  $fields_changed = module_spy_fields_changed_user($edit, $account->original);
+  $change = array(
+    'form' => "user-profile-form (".$account->uid.")",
+    'change' => ''
+  ); 
+  module_spy_log_manip($change);
 }
