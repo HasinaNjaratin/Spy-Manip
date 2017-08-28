@@ -3,7 +3,7 @@
 /**
 * Log manip
 **/
-function module_spy_log_manip($change){
+function spy_manip_log_manip($change){
   global $user;
   db_insert('spy')->fields(array(
       'spy_Id' => REQUEST_TIME,
@@ -29,7 +29,7 @@ function module_spy_log_manip($change){
  *   The prepared node object for comparison.
  *   This function may also pass itself a FieldCollectionItemEntity object to compare field collections.
  */
-function module_spy_fields_changed_node($old_entity, $new_entity, $bundle=NULL) {
+function spy_manip_fields_changed_node($old_entity, $new_entity, $bundle=NULL) {
   // Check for node or field collection.
   $entity_is_field_collection = (get_class($old_entity) == 'FieldCollectionItemEntity');
 
@@ -126,7 +126,7 @@ function module_spy_fields_changed_node($old_entity, $new_entity, $bundle=NULL) 
 /*
 * Fields changed from taxonomy term
 */
-function module_spy_fields_changed_term($old_term, $new_term){
+function spy_manip_fields_changed_term($old_term, $new_term){
   $fields_changed = [];
   if($old_term->name !== $new_term->name){ $fields_changed[] = 'name'; }
   if($old_term->description !== $new_term->description){ $fields_changed[] = 'description'; }
@@ -151,7 +151,7 @@ function module_spy_fields_changed_term($old_term, $new_term){
 /*
 * Fields changed from user
 */
-function module_spy_fields_changed_user($edit,$account){
+function spy_manip_fields_changed_user($edit,$account){
   $fields_changed = [];
   return $fields_changed;
 }

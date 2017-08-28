@@ -3,18 +3,18 @@
 /**
  * Implements hook_install().
  */
-function module_spy_install() {
-    _module_spy_create_table();  
+function spy_manip_install() {
+    _spy_manip_create_table();  
 }
 
 /**
  * Implements hook_uninstall().
  */
-function module_spy_uninstall() {
-    _module_spy_drop_table();  
+function spy_manip_uninstall() {
+    _spy_manip_drop_table();  
 }
 
-function _module_spy_create_table(){
+function _spy_manip_create_table(){
     db_query('CREATE TABLE spy
         (
             spy_Id int NOT NULL,
@@ -29,6 +29,6 @@ function _module_spy_create_table(){
     );
 }
 
-function _module_spy_drop_table(){
+function _spy_manip_drop_table(){
 	db_query('DROP TABLE IF EXISTS spy');
 }

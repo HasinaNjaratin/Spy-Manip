@@ -2,5 +2,5 @@ name = Module Espion
 description = "Spy all operations from Back office"
 package = My Development
 core = 7.x
-files[] = includes/module_spy.dev.inc
-files[] = includes/module_spy.functions.inc
+files[] = includes/spy_manip.dev.inc
+files[] = includes/spy_manip.functions.inc
