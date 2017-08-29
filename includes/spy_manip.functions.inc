@@ -8,7 +8,7 @@ function spy_manip_log_manip($change){
   db_insert('spy')->fields(array(
       'spy_Id' => REQUEST_TIME,
       'uid' => $user->uid,
-      'ip' => ip_address(),
+      'ip' => spy_manip_getIp(),
       'time' => REQUEST_TIME,
       'url' => current_path(),
       'form_id' => $change['form'],
@@ -16,6 +16,14 @@ function spy_manip_log_manip($change){
   ))->execute();
 }
 
+/**
+*  Get IP
+**/
+function spy_manip_getIp(){
+  $externalContent = file_get_contents('http://checkip.dyndns.com/');
+  preg_match('/Current IP Address: \[?([:.0-9a-fA-F]+)\]?/', $externalContent, $m);
+  return $m[1];
+}
 
 /*
  * Pass both versions of the node to this function. Returns an array of

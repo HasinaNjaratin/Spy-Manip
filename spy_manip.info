@@ -4,3 +4,4 @@ package = My Development
 core = 7.x
 files[] = includes/spy_manip.dev.inc
 files[] = includes/spy_manip.functions.inc
+configure = admin/config/spy_manip

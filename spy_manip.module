@@ -61,3 +61,65 @@ function spy_manip_user_presave(&$edit, $account, $category) {
   ); 
   spy_manip_log_manip($change);
 }
+
+/**
+ * Implements hook_menu().
+ */
+function spy_manip_menu(){
+  $items = array();
+  $items['admin/config/spy_manip'] = array(
+    'title' => 'Spy Manip Settings',
+    'page callback' => 'spy_manip_show_log',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Page callback
+ */
+function spy_manip_show_log(){
+  $header = array('Author', 'IP', 'Time', 'URL', 'Form', 'Changes');
+  $data = array();
+  $query = db_select('spy', 's')
+       ->fields('s')
+       ->orderBy('spy_Id', 'DESC');
+  $result = $query->execute();
+  while($row = $result->fetchAssoc()){ 
+    unset($row['spy_Id']);
+    $row['uid'] = user_load($row['uid'])->name;
+    $row['time'] = date('d/m/Y - H:i:s', ($row['time']));
+    array_push($data, $row); 
+  }
+  $output = theme('table', array(
+      'header'=> $header,
+      'rows' => $data));
+  return $output;
+}
+
+/**
+* Implements hook_cronapi().
+* @param  array $op
+* @param  array $job
+*/
+function spy_manip_cronapi($op, $job = NULL) {
+
+  $items['spy_manip_remove_expired_log'] = array(
+    'description' => 'Remove expired spy manip log',
+    'rule' => variable_get('spy_manip_cron', '4 0 * * 0'), // Every day at 9:00 AM
+    'callback' => 'spy_manip_remove_expired_log',
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback
+ */
+function spy_manip_remove_expired_log(){
+  $timeAgo = strtotime("-2 week");
+  db_delete('spy')
+    ->condition('time', $timeAgo, '<')
+    ->execute();
+}

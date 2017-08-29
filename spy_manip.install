@@ -4,7 +4,9 @@
  * Implements hook_install().
  */
 function spy_manip_install() {
-    _spy_manip_create_table();  
+    if(!db_table_exists('spy')){
+        _spy_manip_create_table();  
+    }
 }
 
 /**
